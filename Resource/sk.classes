@@ -1,0 +1,81 @@
+####
+Feed
+####
+
+@@@ Structure
+
+feed = {
+	entry: {
+		0: video_entry
+		1: video_entry
+	}
+}
+
+
+@@@ Flow
+
+- all the entries should be build in the parent class - MediaEntry
+
+
+@@@ Entry type
+
+# VideoEntry
+- this entry represents a single video
+
+# UserFavoritesEntry
+- this entry will have one or more VideoEntry objects
+
+# PlaylistItemEntry
+- represents and item of playlist type which in turn has one or more VideoEntry objects
+
+# PlaylistCollectionEntry
+- this is an object representing the playlists of an user
+- this will have one or more PlaylistItemEntry objects
+
+
+# Favorites
+
+entry
+	VideoEntry
+	VideoEntry
+
+
+# PlaylistCollection
+
+entry
+	PlaylistItemEntry
+		VideoEntry
+	PlaylistItemEntry
+		VideoEntry
+
+
+# PlaylistItem
+
+entry
+	VideoEntry
+	VideoEntry
+
+
+
+###
+ ENTRY ????
+###
+
+feed: {
+	entry: {
+		0: {},
+		1: {},
+		n: {}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
