@@ -33,15 +33,16 @@ Seek.Gdata.Feed = {};
 
 
 /**
- * @class SkVideoFeedFactory
- * @description acts as a factory for the VideoFeed type
+ * @class ActiveFeed
+ * @description acts as a builder for the VideoFeed type
  */
 Seek.Gdata.Feed.ActiveFeed = Class({
 	statics: {
 		buildFeed: function(raw_feed, feed_class, callback) {
 			var feed_instance = this._buildInstance(feed_class, raw_feed);
 			if(feed_instance) {
-				callback.call(this, feed_instance);
+				if(!_.isUndefined(callback))
+					callback.call(this, feed_instance);
 			} else {
 				throw new Error('Unable to call feed class:: ' + feed_class);
 			}
@@ -62,123 +63,105 @@ Seek.Gdata.Feed.ActiveFeed = Class({
  * @description acts as an abstract for all the feeds
  */
 Seek.Gdata.Feed.BaseFeed = Class({
-	Extends: Seek.Gdata.Media,
+	Extends: Seek.Gdata.MediaFeed,
 	
-	data: null,
+	_context: null,
 	
-	getData: function() {
-		return this.data;
+	_data: null,
+	
+	_entry: null,
+	
+	/**
+	 * @param {String} context_val - the context class
+	 */
+	setContext: function(context_val) {
+		this._context = context_val;
+	},
+	/**
+	 * @returns {String}
+	 */
+	getContext: function() {
+		return this._context;
 	},
 	
+	
+	/**
+	 * @param {Object} data_val - the actual feed returned from Gdata
+	 */
 	setData: function(data_val) {
-		this.data = data_val;
+		this._data = data_val;
+	},
+	/**
+	 * @returns {Object}
+	 */
+	getData: function() {
+		return this._data;
 	},
 	
-	getFeed: function() {
-		return this.data.feed;
-	},
 	
-	setFeed: function(feed_data) {
-		this.data.feed = feed_data.feed;
+	/**
+	 * @param {Object} entry_val - the actual entry classes/object
+	 */
+	setEntry: function(entry_val) {
+		this._entry = entry_val;
 	},
-	
-	getEntry: function(entry_index) {
-		if(this.data.entry) {
-			return this.data.entry[entry_index] || this.data.entry;
-		} else {
-			return null;
+	/**
+	 * @returns {Object}
+	 */
+	getEntry: function() {
+		return this._entry;
+	}
+});
+
+
+
+	/**
+	 * @class VideoFeed base class
+	 * @description act as a base class for video type feeds(the ones that will containt videos, dooh)
+	 */
+	Seek.Gdata.Feed.VideoFeed = Class({
+		Extends: Seek.Gdata.Feed.BaseFeed,
+		
+		initialize: function(feed_data) {
+			this.setContext('VideoFeed');
+			this.setData(feed_data.feed);
+			cl('feed:: new VideoFeed');
 		}
-	},
-	
-	setEntry: function(feed_entry, feed_type) {
-		if(_.isUndefined(feed_entry)) {
-			this.data.entry = null;
-			return;
+	});
+
+	/**
+	 * @class PlaylistCollectionFeed
+	 * @description the playlist collection of a user
+	 * - will contain an entry with one or more {PlaylistItem} objects
+	 */
+	Seek.Gdata.Feed.PlaylistCollectionFeed = Class({
+		Extends: Seek.Gdata.Feed.BaseFeed,
+		
+		initialize: function(feed_data) {
+			this.setContext('PlaylistCollectionFeed');
+			this.setData(feed_data.feed);
+			cl('new feed:: PlaylistCollectionFeed')
 		}
-		var entry = feed_entry,
-			length = feed_entry.length,
-			tmp_obj = {},
-			feed_type = feed_type || this.data.class_type.replace('Feed', 'Entry');
-		for(var i = 0; i < length; i++) {
-			tmp_obj[i] = new Seek.Gdata.Entry[feed_type](entry[i]);
+	});
+	
+	
+	Seek.Gdata.Feed.PlaylistItemFeed = Class({
+		Extends: Seek.Gdata.Feed.BaseFeed,
+		
+		initialize: function(feed_data) {
+			this.setContext('PlaylistItemFeed');
+			this.setData(feed_data.feed);
+			cl('new feed:: PlaylistItemFeed')
 		}
-		this.data.entry = tmp_obj;
-	},
+	});
 	
-	getCount: function() {
-		return this.data.feed.entry.length;
-	}
-});
-
-
-/**
- * subclasses > BaseFeed
- */
-
-
-/**
- * @class VideoFeed base class
- * @description act as a base class for video type feeds(the ones that will containt videos, dooh)
- */
-Seek.Gdata.Feed.VideoFeed = Class({
-	Extends: Seek.Gdata.Feed.BaseFeed,
 	
-	initialize: function(feed_data) {
-		this.data = { class_type: 'VideoFeed', feed: null, entry: null, };
-		this.setFeed(feed_data);
-		this.setEntry(feed_data.feed.entry);
-		cl('new feed:: VideoFeed');
-	}
-});
-
-/**
- * @class PlaylistCollectionFeed
- * @description the playlist collection of a user
- * - will contain an entry with one or more {PlaylistItem} objects
- */
-Seek.Gdata.Feed.PlaylistCollectionFeed = Class({
-	Extends: Seek.Gdata.Feed.BaseFeed,
-	
-	initialize: function(feed_data) {
-		this.data = { class_type: 'PlaylistCollectionFeed', feed: null, entry: null, };
-		this.setFeed(feed_data);
-		this.setEntry(feed_data.feed.entry);
-		cl('new feed:: PlaylistCollectionFeed')
-	}
-});
-
-
-Seek.Gdata.Feed.PlaylistItemFeed = Class({
-	Extends: Seek.Gdata.Feed.BaseFeed,
-	
-	initialize: function(feed_data) {
-		this.data = { class_type: 'PlaylistItemFeed', feed: null, entry: null, };
-		this.setFeed(feed_data);
-		this.setEntry(feed_data.feed.entry);
-		cl('new feed:: PlaylistItemFeed')
-	}
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	Seek.Gdata.Feed.UserProfileFeed = Class({
+		Extends: Seek.Gdata.Feed.BaseFeed,
+		
+		initialize: function(feed_data) {
+			this.setContext('UserProfileFeed');
+			this.setData(feed_data.entry);
+			cl('new feed:: UserProfileFeed')
+		}
+	});
