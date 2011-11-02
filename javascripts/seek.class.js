@@ -42,7 +42,7 @@ var ClassBuilder = {
     dummy_context: null,
     
     // Extended function
-    extends: function(child, parent) {
+    extend: function(child, parent) {
         __extends(child, parent);
     },
     
@@ -108,7 +108,7 @@ function Class(body) {
     
     // Handles extends parent
     if(options.Extends != null) {
-        ClassBuilder.extends(c, body.Extends);
+        ClassBuilder.extend(c, body.Extends);
     }
     
     // Static members
