@@ -61,7 +61,8 @@ var ClassBuilder = {
             for(var item in body) {
                 if(body[item] == 'statics' || body[item] == 'Extends')
                     continue;
-                tmp_methods[item] = body[item];
+                if(tmp_methods.hasOwnProperty(item))
+                    tmp_methods[item] = body[item];
             }
         }
         
